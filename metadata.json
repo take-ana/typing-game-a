@@ -1,0 +1,5 @@
+{
+  "name": "Phaser Typing Game",
+  "description": "A fun typing game built with React, Phaser 3, and Tailwind CSS. Test your typing speed against the clock!",
+  "requestFramePermissions": []
+}
