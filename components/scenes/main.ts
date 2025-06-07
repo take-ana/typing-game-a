@@ -13,6 +13,7 @@ export class MainScene extends Phaser.Scene {
     private inputTextObj!: Phaser.GameObjects.Text;
     private startButton!: Phaser.GameObjects.Text;
     private retryButton!: Phaser.GameObjects.Text;
+    private gameOverText!: Phaser.GameObjects.Text;
     private timerEvent!: Phaser.Time.TimerEvent;
 
     constructor() {
@@ -60,6 +61,10 @@ export class MainScene extends Phaser.Scene {
         this.gameActive = true;
         this.startButton.setVisible(false);
         this.retryButton.setVisible(false);
+
+        if (this.gameOverText) {
+            this.gameOverText.destroy();
+        }
 
         this.scoreText.setText(`Score: ${this.score}`);
         this.timerText.setText(`Time: ${this.timeRemaining}`);
@@ -111,7 +116,7 @@ export class MainScene extends Phaser.Scene {
         this.timerEvent.remove(false);
         this.wordText.setText('');
         this.inputTextObj.setText('');
-        this.add.text(400, 200, 'Game Over', { fontSize: '48px', backgroundColor: '#f00' }).setOrigin(0.5);
+        this.gameOverText = this.add.text(400, 200, 'Game Over', { fontSize: '48px', backgroundColor: '#f00' }).setOrigin(0.5);
         this.retryButton.setVisible(true);
     }
 }
