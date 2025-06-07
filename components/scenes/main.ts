@@ -63,7 +63,7 @@ export class MainScene extends Phaser.Scene {
         this.retryButton.setVisible(false);
 
         if (this.gameOverText) {
-            this.gameOverText.destroy();
+            this.gameOverText.setVisible(false);
         }
 
         this.scoreText.setText(`Score: ${this.score}`);
