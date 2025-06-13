@@ -1,6 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import Phaser from 'phaser';
-import { MainScene } from './scenes/main'; // 先ほどの main.ts でエクスポートした MainScene
+import React, { useEffect, useRef } from "react";
+import Phaser from "phaser";
+import { MainScene } from "./scenes/main"; // 先ほどの main.ts でエクスポートした MainScene
 
 const PhaserGame: React.FC = () => {
   const gameContainer = useRef<HTMLDivElement>(null);
@@ -14,7 +14,7 @@ const PhaserGame: React.FC = () => {
       height: 600,
       parent: gameContainer.current,
       scene: MainScene,
-      backgroundColor: '#fff',
+      backgroundColor: "#fff",
     };
 
     const game = new Phaser.Game(config);
