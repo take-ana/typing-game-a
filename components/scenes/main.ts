@@ -80,7 +80,7 @@ export class MainScene extends Phaser.Scene {
       .setVisible(false);
 
     // キーボード入力
-    this.input.keyboard?.on("keydown", this.handleKey, this);
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.handleKey(event), this);
   }
 
   private startGame(): void {
@@ -100,7 +100,7 @@ export class MainScene extends Phaser.Scene {
 
     this.timerEvent = this.time.addEvent({
       delay: 1000,
-      callback: this.onSecond,
+      callback: () => this.onSecond(),
       callbackScope: this,
       loop: true,
     });
