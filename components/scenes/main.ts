@@ -153,16 +153,3 @@ export class MainScene extends Phaser.Scene {
     this.retryButton.setVisible(true);
   }
 }
-
-const config: Phaser.Types.Core.GameConfig = {
-  type: Phaser.AUTO,
-  width: 800,
-  height: 600,
-  parent: "game",
-  scene: MainScene,
-  backgroundColor: "#fff",
-};
-
-window.onload = () => {
-  new Phaser.Game(config);
-};
