@@ -40,7 +40,7 @@ export class MainScene extends Phaser.Scene {
       "treasure",
     ];
     this.score = 0;
-    this.timeRemaining = 10;
+    this.timeRemaining = 30;
     this.gameActive = false;
     this.lanes = [];
     this.activeLane = 0;
@@ -111,7 +111,7 @@ export class MainScene extends Phaser.Scene {
 
   private startGame(): void {
     this.score = 0;
-    this.timeRemaining = 10;
+    this.timeRemaining = 30;
     this.gameActive = true;
     this.activeLane = 0;
     this.startButton.setVisible(false);
