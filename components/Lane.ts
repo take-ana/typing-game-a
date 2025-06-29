@@ -26,7 +26,7 @@ export class Lane {
     this.number = number;
     this.currentWord = "";
     this.inputText = "";
-    this.wordTimer = 3;
+    this.wordTimer = 10;
     this.isActive = false;
     this.words = words;
 
@@ -72,7 +72,7 @@ export class Lane {
     this.wordText.setText(this.currentWord);
     this.inputText = "";
     this.inputTextObj.setText("");
-    this.wordTimer = 3;
+    this.wordTimer = 10;
     this.wordTimerText.setText(`${this.wordTimer}s`);
 
     if (this.wordTimerEvent) {
