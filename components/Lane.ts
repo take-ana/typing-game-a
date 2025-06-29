@@ -100,6 +100,36 @@ export class Lane {
     this.inputTextObj.setText("");
   }
 
+  public handleCharacterInput(char: string): boolean {
+    if (this.currentWord[this.inputText.length] === char) {
+      this.inputText += char;
+      this.inputTextObj.setText(this.inputText);
+      return true;
+    }
+    return false;
+  }
+
+  public handleBackspace(): void {
+    this.inputText = this.inputText.slice(0, -1);
+    this.inputTextObj.setText(this.inputText);
+  }
+
+  public isWordComplete(): boolean {
+    return this.inputText === this.currentWord;
+  }
+
+  public matchesNumber(digit: string): boolean {
+    return this.number.toString().includes(digit);
+  }
+
+  public exactlyMatchesNumber(digit: string): boolean {
+    return this.number.toString() === digit;
+  }
+
+  public startsWithNumber(digit: string): boolean {
+    return this.number.toString().startsWith(digit);
+  }
+
   public cleanup(): void {
     if (this.wordTimerEvent) {
       this.wordTimerEvent.remove(false);

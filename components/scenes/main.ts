@@ -152,15 +152,10 @@ export class MainScene extends Phaser.Scene {
     if (!this.gameActive) return;
 
     if (event.key.length === 1 && /\d/.test(event.key)) {
-      const typedNumber = parseInt(event.key);
       for (let i = 0; i < this.lanes.length; i++) {
         const lane = this.lanes[i];
-        if (lane.number.toString().includes(event.key)) {
-          if (lane.number.toString() === typedNumber.toString()) {
-            this.switchToLane(i);
-            return;
-          }
-          if (lane.number.toString().startsWith(event.key)) {
+        if (lane.matchesNumber(event.key)) {
+          if (lane.exactlyMatchesNumber(event.key) || lane.startsWithNumber(event.key)) {
             this.switchToLane(i);
             return;
           }
@@ -170,15 +165,12 @@ export class MainScene extends Phaser.Scene {
 
     const currentLane = this.lanes[this.activeLane];
     if (event.key === "Backspace") {
-      currentLane.inputText = currentLane.inputText.slice(0, -1);
+      currentLane.handleBackspace();
     } else if (event.key.length === 1 && /[a-zA-Z]/.test(event.key)) {
-      if (currentLane.currentWord[currentLane.inputText.length] === event.key) {
-        currentLane.inputText += event.key;
-      }
+      currentLane.handleCharacterInput(event.key);
     }
-    currentLane.inputTextObj.setText(currentLane.inputText);
 
-    if (currentLane.inputText === currentLane.currentWord) {
+    if (currentLane.isWordComplete()) {
       this.score++;
       this.scoreText.setText(`Score: ${this.score}`);
       currentLane.pickWord();
