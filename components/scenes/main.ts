@@ -1,16 +1,5 @@
 import Phaser from "phaser";
-
-interface Lane {
-  number: number;
-  currentWord: string;
-  inputText: string;
-  wordText: Phaser.GameObjects.Text;
-  inputTextObj: Phaser.GameObjects.Text;
-  numberText: Phaser.GameObjects.Text;
-  wordTimer: number;
-  wordTimerEvent?: Phaser.Time.TimerEvent;
-  wordTimerText: Phaser.GameObjects.Text;
-}
+import { Lane } from "../Lane";
 
 export class MainScene extends Phaser.Scene {
   private words: string[];
@@ -58,6 +47,8 @@ export class MainScene extends Phaser.Scene {
   }
 
   create(): void {
+    this.events.on('laneTimerExpired', this.endGame, this);
+
     this.timerText = this.add.text(16, 16, `Time: ${this.timeRemaining}`, {
       fontSize: "32px",
       backgroundColor: "#000",
@@ -101,29 +92,7 @@ export class MainScene extends Phaser.Scene {
       const [min, max] = numberRanges[i];
       const laneNumber = Phaser.Math.Between(min, max);
 
-      const lane: Lane = {
-        number: laneNumber,
-        currentWord: "",
-        inputText: "",
-        wordTimer: 3,
-        numberText: this.add
-          .text(x, 120, laneNumber.toString(), {
-            fontSize: "24px",
-            backgroundColor: "#333",
-            color: "#fff",
-          })
-          .setOrigin(0.5),
-        wordText: this.add
-          .text(x, 200, "", { fontSize: "32px", backgroundColor: "#000" })
-          .setOrigin(0.5),
-        inputTextObj: this.add
-          .text(x, 280, "", { fontSize: "32px", backgroundColor: "#000" })
-          .setOrigin(0.5),
-        wordTimerText: this.add
-          .text(x, 360, "", { fontSize: "20px", backgroundColor: "#666" })
-          .setOrigin(0.5),
-      };
-
+      const lane = new Lane(this, x, laneNumber, this.words);
       this.lanes.push(lane);
     }
 
@@ -132,11 +101,11 @@ export class MainScene extends Phaser.Scene {
 
   private highlightActiveLane(): void {
     this.lanes.forEach((lane, index) => {
-      const isActive = index === this.activeLane;
-      lane.numberText.setStyle({
-        backgroundColor: isActive ? "#0f0" : "#333",
-        color: isActive ? "#000" : "#fff",
-      });
+      if (index === this.activeLane) {
+        lane.activate();
+      } else {
+        lane.deactivate();
+      }
     });
   }
 
@@ -156,7 +125,7 @@ export class MainScene extends Phaser.Scene {
     this.timerText.setText(`Time: ${this.timeRemaining}`);
 
     this.lanes.forEach((lane) => {
-      this.pickWordForLane(lane);
+      lane.pickWord();
     });
 
     this.highlightActiveLane();
@@ -177,33 +146,7 @@ export class MainScene extends Phaser.Scene {
     }
   }
 
-  private pickWordForLane(lane: Lane): void {
-    lane.currentWord = Phaser.Utils.Array.GetRandom(this.words);
-    lane.wordText.setText(lane.currentWord);
-    lane.inputText = "";
-    lane.inputTextObj.setText("");
-    lane.wordTimer = 3;
-    lane.wordTimerText.setText(`${lane.wordTimer}s`);
 
-    if (lane.wordTimerEvent) {
-      lane.wordTimerEvent.remove(false);
-    }
-
-    lane.wordTimerEvent = this.time.addEvent({
-      delay: 1000,
-      callback: () => this.onLaneSecond(lane),
-      callbackScope: this,
-      loop: true,
-    });
-  }
-
-  private onLaneSecond(lane: Lane): void {
-    lane.wordTimer--;
-    lane.wordTimerText.setText(`${lane.wordTimer}s`);
-    if (lane.wordTimer <= 0) {
-      this.endGame();
-    }
-  }
 
   private handleKey(event: KeyboardEvent): void {
     if (!this.gameActive) return;
@@ -238,13 +181,12 @@ export class MainScene extends Phaser.Scene {
     if (currentLane.inputText === currentLane.currentWord) {
       this.score++;
       this.scoreText.setText(`Score: ${this.score}`);
-      this.pickWordForLane(currentLane);
+      currentLane.pickWord();
     }
   }
 
   private switchToLane(laneIndex: number): void {
-    this.lanes[this.activeLane].inputText = "";
-    this.lanes[this.activeLane].inputTextObj.setText("");
+    this.lanes[this.activeLane].clearInput();
     this.activeLane = laneIndex;
     this.highlightActiveLane();
   }
@@ -254,12 +196,7 @@ export class MainScene extends Phaser.Scene {
     this.timerEvent.remove(false);
 
     this.lanes.forEach((lane) => {
-      if (lane.wordTimerEvent) {
-        lane.wordTimerEvent.remove(false);
-      }
-      lane.wordText.setText("");
-      lane.inputTextObj.setText("");
-      lane.wordTimerText.setText("");
+      lane.cleanup();
     });
 
     this.gameOverText = this.add
