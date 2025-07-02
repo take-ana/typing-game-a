@@ -8,6 +8,7 @@ export class MainScene extends Phaser.Scene {
   private gameActive: boolean;
   private lanes: Lane[];
   private activeLane: number;
+  private numberInputSequence: string;
   private timerText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
   private startButton!: Phaser.GameObjects.Text;
@@ -44,6 +45,7 @@ export class MainScene extends Phaser.Scene {
     this.gameActive = false;
     this.lanes = [];
     this.activeLane = 0;
+    this.numberInputSequence = "";
   }
 
   create(): void {
@@ -114,6 +116,7 @@ export class MainScene extends Phaser.Scene {
     this.timeRemaining = 30;
     this.gameActive = true;
     this.activeLane = 0;
+    this.numberInputSequence = "";
     this.startButton.setVisible(false);
     this.retryButton.setVisible(false);
 
@@ -152,21 +155,38 @@ export class MainScene extends Phaser.Scene {
     if (!this.gameActive) return;
 
     if (event.key.length === 1 && /\d/.test(event.key)) {
+      this.numberInputSequence += event.key;
+      
       for (let i = 0; i < this.lanes.length; i++) {
         const lane = this.lanes[i];
-        if (lane.matchesNumber(event.key)) {
-          if (lane.exactlyMatchesNumber(event.key) || lane.startsWithNumber(event.key)) {
+        if (lane.number.toString() === this.numberInputSequence) {
+          this.switchToLane(i);
+          this.numberInputSequence = "";
+          return;
+        }
+      }
+      
+      if (this.numberInputSequence.length > 2 || !this.hasValidPrefix()) {
+        this.numberInputSequence = event.key;
+        
+        for (let i = 0; i < this.lanes.length; i++) {
+          const lane = this.lanes[i];
+          if (lane.number.toString() === this.numberInputSequence) {
             this.switchToLane(i);
+            this.numberInputSequence = "";
             return;
           }
         }
       }
+      return;
     }
 
     const currentLane = this.lanes[this.activeLane];
     if (event.key === "Backspace") {
+      this.numberInputSequence = "";
       currentLane.handleBackspace();
     } else if (event.key.length === 1 && /[a-zA-Z]/.test(event.key)) {
+      this.numberInputSequence = "";
       currentLane.handleCharacterInput(event.key);
     }
 
@@ -175,6 +195,12 @@ export class MainScene extends Phaser.Scene {
       this.scoreText.setText(`Score: ${this.score}`);
       currentLane.pickWord();
     }
+  }
+
+  private hasValidPrefix(): boolean {
+    return this.lanes.some(lane => 
+      lane.number.toString().startsWith(this.numberInputSequence)
+    );
   }
 
   private switchToLane(laneIndex: number): void {
