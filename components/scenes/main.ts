@@ -49,7 +49,7 @@ export class MainScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.events.on('laneTimerExpired', this.endGame, this);
+    this.events.on('laneTimerExpired', () => this.endGame(), this);
 
     this.timerText = this.add.text(16, 16, `Time: ${this.timeRemaining}`, {
       fontSize: "32px",

@@ -15,18 +15,21 @@ export class Lane {
 
   private scene: Phaser.Scene;
   private words: string[];
+  private wordTimerDuration: number;
 
   constructor(
     scene: Phaser.Scene,
     x: number,
     number: number,
-    words: string[]
+    words: string[],
+    wordTimer = 10
   ) {
     this.scene = scene;
     this.number = number;
     this.currentWord = "";
     this.inputText = "";
-    this.wordTimer = 10;
+    this.wordTimer = wordTimer;
+    this.wordTimerDuration = wordTimer;
     this.isActive = false;
     this.words = words;
 
@@ -72,7 +75,7 @@ export class Lane {
     this.wordText.setText(this.currentWord);
     this.inputText = "";
     this.inputTextObj.setText("");
-    this.wordTimer = 10;
+    this.wordTimer = this.wordTimerDuration;
     this.wordTimerText.setText(`${this.wordTimer}s`);
 
     if (this.wordTimerEvent) {
