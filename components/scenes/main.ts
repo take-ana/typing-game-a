@@ -1,16 +1,16 @@
 import Phaser from "phaser";
+import { Lane } from "../Lane";
 
 export class MainScene extends Phaser.Scene {
   private words: string[];
   private score: number;
   private timeRemaining: number;
   private gameActive: boolean;
-  private currentWord: string;
-  private inputText: string;
+  private lanes: Lane[];
+  private activeLane: number;
+  private numberInputSequence: string;
   private timerText!: Phaser.GameObjects.Text;
   private scoreText!: Phaser.GameObjects.Text;
-  private wordText!: Phaser.GameObjects.Text;
-  private inputTextObj!: Phaser.GameObjects.Text;
   private startButton!: Phaser.GameObjects.Text;
   private retryButton!: Phaser.GameObjects.Text;
   private gameOverText!: Phaser.GameObjects.Text;
@@ -41,14 +41,16 @@ export class MainScene extends Phaser.Scene {
       "treasure",
     ];
     this.score = 0;
-    this.timeRemaining = 10;
+    this.timeRemaining = 30;
     this.gameActive = false;
-    this.currentWord = "";
-    this.inputText = "";
+    this.lanes = [];
+    this.activeLane = 0;
+    this.numberInputSequence = "";
   }
 
   create(): void {
-    // テキストオブジェクト
+    this.events.on('laneTimerExpired', () => this.endGame(), this);
+
     this.timerText = this.add.text(16, 16, `Time: ${this.timeRemaining}`, {
       fontSize: "32px",
       backgroundColor: "#000",
@@ -57,23 +59,19 @@ export class MainScene extends Phaser.Scene {
       fontSize: "32px",
       backgroundColor: "#000",
     });
-    this.wordText = this.add
-      .text(400, 200, "", { fontSize: "48px", backgroundColor: "#000" })
-      .setOrigin(0.5);
-    this.inputTextObj = this.add
-      .text(400, 300, "", { fontSize: "48px", backgroundColor: "#000" })
-      .setOrigin(0.5);
+
+    this.createLanes();
 
     // Start ボタン
     this.startButton = this.add
-      .text(400, 400, "Start", { fontSize: "40px", backgroundColor: "#0f0" })
+      .text(400, 500, "Start", { fontSize: "40px", backgroundColor: "#0f0" })
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.startGame());
 
     // Retry ボタン
     this.retryButton = this.add
-      .text(400, 400, "Retry", { fontSize: "40px", backgroundColor: "#f00" })
+      .text(400, 500, "Retry", { fontSize: "40px", backgroundColor: "#f00" })
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.startGame())
@@ -83,10 +81,42 @@ export class MainScene extends Phaser.Scene {
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.handleKey(event), this);
   }
 
+  private createLanes(): void {
+    const lanePositions = [200, 400, 600];
+    const numberRanges = [
+      [10, 39],
+      [40, 69],
+      [70, 99],
+    ];
+
+    for (let i = 0; i < 3; i++) {
+      const x = lanePositions[i];
+      const [min, max] = numberRanges[i];
+      const laneNumber = Phaser.Math.Between(min, max);
+
+      const lane = new Lane(this, x, laneNumber, this.words);
+      this.lanes.push(lane);
+    }
+
+    this.highlightActiveLane();
+  }
+
+  private highlightActiveLane(): void {
+    this.lanes.forEach((lane, index) => {
+      if (index === this.activeLane) {
+        lane.activate();
+      } else {
+        lane.deactivate();
+      }
+    });
+  }
+
   private startGame(): void {
     this.score = 0;
-    this.timeRemaining = 10;
+    this.timeRemaining = 30;
     this.gameActive = true;
+    this.activeLane = 0;
+    this.numberInputSequence = "";
     this.startButton.setVisible(false);
     this.retryButton.setVisible(false);
 
@@ -96,7 +126,12 @@ export class MainScene extends Phaser.Scene {
 
     this.scoreText.setText(`Score: ${this.score}`);
     this.timerText.setText(`Time: ${this.timeRemaining}`);
-    this.pickWord();
+
+    this.lanes.forEach((lane) => {
+      lane.pickWord();
+    });
+
+    this.highlightActiveLane();
 
     this.timerEvent = this.time.addEvent({
       delay: 1000,
@@ -114,36 +149,74 @@ export class MainScene extends Phaser.Scene {
     }
   }
 
-  private pickWord(): void {
-    this.currentWord = Phaser.Utils.Array.GetRandom(this.words);
-    this.wordText.setText(this.currentWord);
-    this.inputText = "";
-    this.inputTextObj.setText("");
-  }
+
 
   private handleKey(event: KeyboardEvent): void {
     if (!this.gameActive) return;
-    if (event.key === "Backspace") {
-      this.inputText = this.inputText.slice(0, -1);
-    } else if (event.key.length === 1) {
-      if (this.currentWord[this.inputText.length] === event.key) {
-        this.inputText += event.key;
-      }
-    }
-    this.inputTextObj.setText(this.inputText);
 
-    if (this.inputText === this.currentWord) {
+    if (event.key.length === 1 && /\d/.test(event.key)) {
+      this.numberInputSequence += event.key;
+      
+      for (let i = 0; i < this.lanes.length; i++) {
+        const lane = this.lanes[i];
+        if (lane.number.toString() === this.numberInputSequence) {
+          this.switchToLane(i);
+          this.numberInputSequence = "";
+          return;
+        }
+      }
+      
+      if (this.numberInputSequence.length > 2 || !this.hasValidPrefix()) {
+        this.numberInputSequence = event.key;
+        
+        for (let i = 0; i < this.lanes.length; i++) {
+          const lane = this.lanes[i];
+          if (lane.number.toString() === this.numberInputSequence) {
+            this.switchToLane(i);
+            this.numberInputSequence = "";
+            return;
+          }
+        }
+      }
+      return;
+    }
+
+    const currentLane = this.lanes[this.activeLane];
+    if (event.key === "Backspace") {
+      this.numberInputSequence = "";
+      currentLane.handleBackspace();
+    } else if (event.key.length === 1 && /[a-zA-Z]/.test(event.key)) {
+      this.numberInputSequence = "";
+      currentLane.handleCharacterInput(event.key);
+    }
+
+    if (currentLane.isWordComplete()) {
       this.score++;
       this.scoreText.setText(`Score: ${this.score}`);
-      this.pickWord();
+      currentLane.pickWord();
     }
+  }
+
+  private hasValidPrefix(): boolean {
+    return this.lanes.some(lane => 
+      lane.number.toString().startsWith(this.numberInputSequence)
+    );
+  }
+
+  private switchToLane(laneIndex: number): void {
+    this.lanes[this.activeLane].clearInput();
+    this.activeLane = laneIndex;
+    this.highlightActiveLane();
   }
 
   private endGame(): void {
     this.gameActive = false;
     this.timerEvent.remove(false);
-    this.wordText.setText("");
-    this.inputTextObj.setText("");
+
+    this.lanes.forEach((lane) => {
+      lane.cleanup();
+    });
+
     this.gameOverText = this.add
       .text(400, 200, "Game Over", {
         fontSize: "48px",
