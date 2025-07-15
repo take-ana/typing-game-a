@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { gameConfig } from "../config/config";
 
 export class Lane {
   public number: number;
@@ -34,39 +35,48 @@ export class Lane {
     this.words = words;
 
     this.numberText = scene.add
-      .text(x, 120, number.toString(), {
-        fontSize: "24px",
-        backgroundColor: "#333",
-        color: "#fff",
+      .text(x, gameConfig.ui.positions.lane.number, number.toString(), {
+        fontSize: gameConfig.ui.fontSize.medium,
+        backgroundColor: gameConfig.ui.colors.inactive,
+        color: gameConfig.ui.colors.text,
       })
       .setOrigin(0.5);
 
     this.wordText = scene.add
-      .text(x, 200, "", { fontSize: "32px", backgroundColor: "#000" })
+      .text(x, gameConfig.ui.positions.lane.word, "", {
+        fontSize: gameConfig.ui.fontSize.large,
+        backgroundColor: gameConfig.ui.colors.background,
+      })
       .setOrigin(0.5);
 
     this.inputTextObj = scene.add
-      .text(x, 280, "", { fontSize: "32px", backgroundColor: "#000" })
+      .text(x, gameConfig.ui.positions.lane.input, "", {
+        fontSize: gameConfig.ui.fontSize.large,
+        backgroundColor: gameConfig.ui.colors.background,
+      })
       .setOrigin(0.5);
 
     this.wordTimerText = scene.add
-      .text(x, 360, "", { fontSize: "20px", backgroundColor: "#666" })
+      .text(x, gameConfig.ui.positions.lane.timer, "", {
+        fontSize: gameConfig.ui.fontSize.small,
+        backgroundColor: gameConfig.ui.colors.neutral,
+      })
       .setOrigin(0.5);
   }
 
   public activate(): void {
     this.isActive = true;
     this.numberText.setStyle({
-      backgroundColor: "#0f0",
-      color: "#000",
+      backgroundColor: gameConfig.ui.colors.active,
+      color: gameConfig.ui.colors.background,
     });
   }
 
   public deactivate(): void {
     this.isActive = false;
     this.numberText.setStyle({
-      backgroundColor: "#333",
-      color: "#fff",
+      backgroundColor: gameConfig.ui.colors.inactive,
+      color: gameConfig.ui.colors.text,
     });
   }
 

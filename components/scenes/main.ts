@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { Lane } from "../Lane";
+import { gameConfig } from "../../config/config";
 
 export class MainScene extends Phaser.Scene {
   private words: string[];
@@ -18,30 +19,9 @@ export class MainScene extends Phaser.Scene {
 
   constructor() {
     super("MainScene");
-    this.words = [
-      "apple",
-      "banana",
-      "cherry",
-      "dragon",
-      "elephant",
-      "forest",
-      "guitar",
-      "happiness",
-      "island",
-      "jazz",
-      "keyboard",
-      "lemon",
-      "mountain",
-      "notebook",
-      "ocean",
-      "python",
-      "quantum",
-      "rainbow",
-      "sunshine",
-      "treasure",
-    ];
+    this.words = gameConfig.words;
     this.score = 0;
-    this.timeRemaining = 30;
+    this.timeRemaining = gameConfig.game.timer;
     this.gameActive = false;
     this.lanes = [];
     this.activeLane = 0;
@@ -51,27 +31,53 @@ export class MainScene extends Phaser.Scene {
   create(): void {
     this.events.on('laneTimerExpired', () => this.endGame(), this);
 
-    this.timerText = this.add.text(16, 16, `Time: ${this.timeRemaining}`, {
-      fontSize: "32px",
-      backgroundColor: "#000",
-    });
-    this.scoreText = this.add.text(16, 56, `Score: ${this.score}`, {
-      fontSize: "32px",
-      backgroundColor: "#000",
-    });
+    this.timerText = this.add.text(
+      gameConfig.ui.positions.timer.x,
+      gameConfig.ui.positions.timer.y,
+      `Time: ${this.timeRemaining}`,
+      {
+        fontSize: gameConfig.ui.fontSize.large,
+        backgroundColor: gameConfig.ui.colors.background,
+      }
+    );
+    this.scoreText = this.add.text(
+      gameConfig.ui.positions.score.x,
+      gameConfig.ui.positions.score.y,
+      `Score: ${this.score}`,
+      {
+        fontSize: gameConfig.ui.fontSize.large,
+        backgroundColor: gameConfig.ui.colors.background,
+      }
+    );
 
     this.createLanes();
 
     // Start ボタン
     this.startButton = this.add
-      .text(400, 500, "Start", { fontSize: "40px", backgroundColor: "#0f0" })
+      .text(
+        gameConfig.ui.positions.startButton.x,
+        gameConfig.ui.positions.startButton.y,
+        "Start",
+        {
+          fontSize: gameConfig.ui.fontSize.xlarge,
+          backgroundColor: gameConfig.ui.colors.success,
+        }
+      )
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.startGame());
 
     // Retry ボタン
     this.retryButton = this.add
-      .text(400, 500, "Retry", { fontSize: "40px", backgroundColor: "#f00" })
+      .text(
+        gameConfig.ui.positions.retryButton.x,
+        gameConfig.ui.positions.retryButton.y,
+        "Retry",
+        {
+          fontSize: gameConfig.ui.fontSize.xlarge,
+          backgroundColor: gameConfig.ui.colors.danger,
+        }
+      )
       .setOrigin(0.5)
       .setInteractive()
       .on("pointerdown", () => this.startGame())
@@ -82,19 +88,12 @@ export class MainScene extends Phaser.Scene {
   }
 
   private createLanes(): void {
-    const lanePositions = [200, 400, 600];
-    const numberRanges = [
-      [10, 39],
-      [40, 69],
-      [70, 99],
-    ];
-
-    for (let i = 0; i < 3; i++) {
-      const x = lanePositions[i];
-      const [min, max] = numberRanges[i];
+    for (let i = 0; i < gameConfig.lanes.count; i++) {
+      const x = gameConfig.lanes.positions[i];
+      const [min, max] = gameConfig.lanes.numberRanges[i];
       const laneNumber = Phaser.Math.Between(min, max);
 
-      const lane = new Lane(this, x, laneNumber, this.words);
+      const lane = new Lane(this, x, laneNumber, this.words, gameConfig.lanes.wordTimer);
       this.lanes.push(lane);
     }
 
@@ -113,7 +112,7 @@ export class MainScene extends Phaser.Scene {
 
   private startGame(): void {
     this.score = 0;
-    this.timeRemaining = 30;
+    this.timeRemaining = gameConfig.game.timer;
     this.gameActive = true;
     this.activeLane = 0;
     this.numberInputSequence = "";
@@ -218,10 +217,15 @@ export class MainScene extends Phaser.Scene {
     });
 
     this.gameOverText = this.add
-      .text(400, 200, "Game Over", {
-        fontSize: "48px",
-        backgroundColor: "#f00",
-      })
+      .text(
+        gameConfig.ui.positions.gameOver.x,
+        gameConfig.ui.positions.gameOver.y,
+        "Game Over",
+        {
+          fontSize: gameConfig.ui.fontSize.xlarge,
+          backgroundColor: gameConfig.ui.colors.danger,
+        }
+      )
       .setOrigin(0.5);
     this.retryButton.setVisible(true);
   }
