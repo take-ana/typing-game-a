@@ -44,23 +44,6 @@ export interface Config {
   words: string[];
 }
 
-export function calculateLanePositions(count: number, canvasWidth: number, spacing: number): number[] {
-  const totalWidth = canvasWidth - spacing * 2;
-  const laneSpacing = totalWidth / (count + 1);
-  return Array.from({ length: count }, (_, i) => spacing + laneSpacing * (i + 1));
-}
-
-export function calculateNumberRanges(count: number, start: number = 10, end: number = 99): [number, number][] {
-  const total = end - start + 1;
-  const rangeSize = Math.floor(total / count);
-  
-  return Array.from({ length: count }, (_, i) => {
-    const rangeStart = start + i * rangeSize;
-    const rangeEnd = i === count - 1 ? end : rangeStart + rangeSize - 1;
-    return [rangeStart, rangeEnd] as [number, number];
-  });
-}
-
 export function validateConfig(config: Config): boolean {
   return (
     config.lanes.count > 0 &&

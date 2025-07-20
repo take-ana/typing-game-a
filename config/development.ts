@@ -1,4 +1,4 @@
-import { Config, calculateLanePositions, calculateNumberRanges } from "./types";
+import { Config } from "./types";
 
 export const developmentConfig: Config = {
   game: {
@@ -9,9 +9,9 @@ export const developmentConfig: Config = {
   },
   lanes: {
     count: 3,
-    positions: calculateLanePositions(3, 800, 50),
-    numberRanges: calculateNumberRanges(3, 10, 99),
-    wordTimer: 15, // 開発時は長めに設定
+    positions: [150, 400, 650],
+    numberRanges: [[10, 39], [40, 69], [70, 99]],
+    wordTimer: 20, // 開発時は長めに設定
   },
   ui: {
     fontSize: {

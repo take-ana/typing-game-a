@@ -1,17 +1,17 @@
-import { Config, calculateLanePositions, calculateNumberRanges } from "./types";
+import { Config } from "./types";
 
 export const productionConfig: Config = {
   game: {
-    timer: 30, // 本番用の適切な時間
+    timer: 45, // 本番用の適切な時間
     canvasWidth: 800,
     canvasHeight: 600,
     backgroundColor: "#eee",
   },
   lanes: {
     count: 3,
-    positions: calculateLanePositions(3, 800, 100),
-    numberRanges: calculateNumberRanges(3, 10, 99),
-    wordTimer: 10, // 本番用の適切な時間
+    positions: [150, 400, 650],
+    numberRanges: [[10, 39], [40, 69], [70, 99]],
+    wordTimer: 15, // 本番用の適切な時間
   },
   ui: {
     fontSize: {
