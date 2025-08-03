@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import Phaser from "phaser";
 import { MainScene } from "./scenes/main"; // 先ほどの main.ts でエクスポートした MainScene
+import { gameConfig } from "../config/config";
 
 const PhaserGame: React.FC = () => {
   const gameContainer = useRef<HTMLDivElement>(null);
@@ -10,11 +11,11 @@ const PhaserGame: React.FC = () => {
 
     const config: Phaser.Types.Core.GameConfig = {
       type: Phaser.AUTO,
-      width: 800,
-      height: 600,
+      width: gameConfig.game.canvasWidth,
+      height: gameConfig.game.canvasHeight,
       parent: gameContainer.current,
       scene: MainScene,
-      backgroundColor: "#fff",
+      backgroundColor: gameConfig.game.backgroundColor,
     };
 
     const game = new Phaser.Game(config);
@@ -26,7 +27,7 @@ const PhaserGame: React.FC = () => {
 
   return (
     <div className="w-full h-full flex items-center justify-center">
-      <div ref={gameContainer} className="w-[800px] h-[600px]">
+      <div ref={gameContainer} className={`w-[${gameConfig.game.canvasWidth}px] h-[${gameConfig.game.canvasHeight}px]`}>
         {/* Phaser がここにゲームを描画します */}
       </div>
     </div>
