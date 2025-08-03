@@ -204,6 +204,13 @@ export class MainScene extends Phaser.Scene {
 
   private switchToLane(laneIndex: number): void {
     this.lanes[this.activeLane].clearInput();
+    
+    // 切り替え元のレーンの数字をランダムに再選択
+    const oldLane = this.lanes[this.activeLane];
+    const [min, max] = gameConfig.lanes.numberRanges[this.activeLane];
+    const newNumber = Phaser.Math.Between(min, max);
+    oldLane.updateNumber(newNumber);
+    
     this.activeLane = laneIndex;
     this.highlightActiveLane();
   }

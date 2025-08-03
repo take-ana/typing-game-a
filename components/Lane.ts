@@ -143,6 +143,11 @@ export class Lane {
     return this.number.toString().startsWith(digit);
   }
 
+  public updateNumber(newNumber: number): void {
+    this.number = newNumber;
+    this.numberText.setText(newNumber.toString());
+  }
+
   public cleanup(): void {
     if (this.wordTimerEvent) {
       this.wordTimerEvent.remove(false);
